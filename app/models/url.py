@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.db.database import Base
-from app.models.user import User  
+from app.models.user import User  # Explicit import of User
 
 class URL(Base):
     __tablename__ = "urls"

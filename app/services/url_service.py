@@ -11,7 +11,7 @@ redis_client = redis.Redis.from_url(settings.REDIS_URL, decode_responses=True)
 
 def generate_short_key(url: str) -> str:
     hash_object = xxhash.xxh64()
-    hash_object.update(str(url).encode('utf-8'))  # Преобразуем url в строку
+    hash_object.update(str(url).encode('utf-8'))
     hash_int = hash_object.intdigest()
     return base62.encode(hash_int)[:8]
 
@@ -24,7 +24,7 @@ def create_short_url(db: Session, url: URLCreate, user_id: int = None) -> URLRes
         raise HTTPException(status_code=400, detail="Short key collision")
     
     db_url = URL(
-        original_url=str(url.original_url),  # Преобразуем HttpUrl в строку
+        original_url=str(url.original_url),
         short_key=short_key,
         user_id=user_id
     )
@@ -33,7 +33,7 @@ def create_short_url(db: Session, url: URLCreate, user_id: int = None) -> URLRes
     db.refresh(db_url)
     
     # Кеширование
-    redis_client.setex(f"url:{short_key}", 3600, db_url.original_url)
+    redis_client.setex(f"url:{short_key}", settings.REDIS_TTL, db_url.original_url)
     
     return URLResponse(
         original_url=db_url.original_url,
@@ -55,5 +55,5 @@ def get_original_url(db: Session, short_key: str) -> str:
         raise HTTPException(status_code=404, detail="URL not found")
     
     # Обновление кеша
-    redis_client.setex(f"url:{short_key}", 3600, db_url.original_url)
+    redis_client.setex(f"url:{short_key}", settings.REDIS_TTL, db_url.original_url)
     return db_url.original_url

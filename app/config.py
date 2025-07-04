@@ -5,6 +5,7 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://redis:6379/0"
     BASE_URL: str = "http://localhost:8000"
     SECRET_KEY: str = "your-secret-key"
+    REDIS_TTL: int = 3600  # Добавляем поле REDIS_TTL
     
     class Config:
         env_file = ".env"
